@@ -104,7 +104,8 @@ class BaseProtocol extends EventEmitter {
     this.log('connected', idB58Str)
 
     const peer = this._addPeer(new Peer(peerInfo))
-    peer.attachConnection(conn)
+    
+    this._processOutgoingConnection(idB58Str, conn, peer)
 
     setImmediate(() => callback())
   }
@@ -119,12 +120,16 @@ class BaseProtocol extends EventEmitter {
       const idB58Str = peerInfo.id.toB58String()
       const peer = this._addPeer(new Peer(peerInfo))
 
-      this._processConnection(idB58Str, conn, peer)
+      this._processIncommingConnection(idB58Str, conn, peer)
     })
   }
 
-  _processConnection (idB58Str, conn, peer) {
-    throw new Error('_processConnection must be implemented by the subclass')
+  _processIncommingConnection (idB58Str, conn, peer) {
+    throw new Error('_processIncommingConnection must be implemented by the subclass')
+  }
+
+  _processOutgoingConnection (idB58Str, conn, peer) {
+    throw new Error('_processOutgoingConnection must be implemented by the subclass')
   }
 
   _onConnectionEnd (idB58Str, peer, err) {

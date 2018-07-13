@@ -6,8 +6,6 @@ const pull = require('pull-stream')
 const setImmediate = require('async/setImmediate')
 const EventEmitter = require('events')
 
-const rpc = require('./message').rpc.RPC
-
 /**
  * The known state of a connected peer.
  */
@@ -22,10 +20,6 @@ class Peer extends EventEmitter {
      * @type {PeerInfo}
      */
     this.info = info
-    /**
-     * @type {Connection}
-     */
-    this.conn = null
     /**
      * @type {Set}
      */
@@ -44,7 +38,7 @@ class Peer extends EventEmitter {
    * @type {boolean}
    */
   get isConnected () {
-    return Boolean(this.conn)
+    return Boolean(this.stream)
   }
 
   /**
@@ -78,22 +72,15 @@ class Peer extends EventEmitter {
    * @param {Connection} conn
    * @returns {undefined}
    */
-  attachConnection (conn) {
-    this.conn = conn
+  createStream () {
     this.stream = new Pushable()
-
-    pull(
-      this.stream,
-      lp.encode(),
-      conn,
-      pull.onEnd(() => {
-        this.conn = null
-        this.stream = null
-        this.emit('close')
-      })
-    )
-
     this.emit('connection')
+    return this.stream
+  }
+
+  onStreamEnd () {
+    this.stream = null
+    this.emit('close')
   }
 
   _sendRawSubscriptions (topics, subscribe) {
@@ -109,9 +96,9 @@ class Peer extends EventEmitter {
       })
     })
 
-    this.write(rpc.encode({
+    this.write({
       subscriptions: subs
-    }))
+    })
   }
 
   /**
@@ -139,9 +126,9 @@ class Peer extends EventEmitter {
    * @returns {undefined}
    */
   sendMessages (msgs) {
-    this.write(rpc.encode({
+    this.write({
       msgs: msgs
-    }))
+    })
   }
 
   /**
@@ -176,7 +163,6 @@ class Peer extends EventEmitter {
     }
 
     setImmediate(() => {
-      this.conn = null
       this.stream = null
       this.emit('close')
       callback()

@@ -5,7 +5,7 @@ const pull = require('pull-stream')
 const lp = require('pull-length-prefixed')
 const assert = require('assert')
 
-const BaseProtocol = require('./base')
+const RpcBaseProtocol = require('./rpcBase')
 const utils = require('./utils')
 const pb = require('./message')
 const config = require('./config')
@@ -20,13 +20,14 @@ const setImmediate = require('async/setImmediate')
  * delivering an API for Publish/Subscribe, but with no CastTree Forming
  * (it just floods the network).
  */
-class FloodSub extends BaseProtocol {
+class FloodSub extends RpcBaseProtocol {
   /**
    * @param {Object} libp2p
    * @returns {FloodSub}
    */
   constructor (libp2p) {
-    super('libp2p:floodsub', multicodec, libp2p)
+    const protonCodec = pb.rpc.RPC
+    super('libp2p:floodsub', multicodec, protonCodec, libp2p)
 
     /**
      * Time based cache for sequence numbers.
@@ -51,18 +52,6 @@ class FloodSub extends BaseProtocol {
       peer.sendSubscriptions(this.subscriptions)
       setImmediate(() => callback())
     })
-  }
-
-  _processConnection (idB58Str, conn, peer) {
-    pull(
-      conn,
-      lp.decode(),
-      pull.map((data) => pb.rpc.RPC.decode(data)),
-      pull.drain(
-        (rpc) => this._onRpc(idB58Str, rpc),
-        (err) => this._onConnectionEnd(idB58Str, peer, err)
-      )
-    )
   }
 
   _onRpc (idB58Str, rpc) {
