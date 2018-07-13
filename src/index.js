@@ -1,8 +1,6 @@
 'use strict'
 
 const TimeCache = require('time-cache')
-const pull = require('pull-stream')
-const lp = require('pull-length-prefixed')
 const assert = require('assert')
 
 const RpcBaseProtocol = require('./rpcBase')

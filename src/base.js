@@ -104,7 +104,6 @@ class BaseProtocol extends EventEmitter {
     this.log('connected', idB58Str)
 
     const peer = this._addPeer(new Peer(peerInfo))
-    
     this._processOutgoingConnection(idB58Str, conn, peer)
 
     setImmediate(() => callback())

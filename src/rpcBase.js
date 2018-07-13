@@ -1,19 +1,9 @@
 'use strict'
 
-const TimeCache = require('time-cache')
 const pull = require('pull-stream')
 const lp = require('pull-length-prefixed')
-const assert = require('assert')
 
 const BaseProtocol = require('./base')
-const utils = require('./utils')
-const pb = require('./message')
-const config = require('./config')
-const Buffer = require('safe-buffer').Buffer
-
-const multicodec = config.multicodec
-const ensureArray = utils.ensureArray
-const setImmediate = require('async/setImmediate')
 
 /**
  * FloodSub (aka dumbsub is an implementation of pubsub focused on
@@ -24,8 +14,8 @@ class RpcBase extends BaseProtocol {
   /**
    * @param {String} debugName
    * @param {String} multicodec
-   * @param {Object} libp2p
    * @param {ProtonCodec} rpcCodec
+   * @param {Object} libp2p
    * @returns {FloodSub}
    */
   constructor (debugName, multicodec, rpcCodec, libp2p) {
@@ -57,7 +47,6 @@ class RpcBase extends BaseProtocol {
       })
     )
   }
-
 }
 
 module.exports = RpcBase
