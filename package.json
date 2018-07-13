@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/libp2p/js-libp2p-floodsub.git"
+    "url": "git+https://github.com/metamask/js-libp2p-multicast-experiment.git"
   },
   "keywords": [
     "IPFS",
@@ -34,9 +34,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/libp2p/js-libp2p-floodsub/issues"
+    "url": "https://github.com/metamask/js-libp2p-multicast-experiment/issues"
   },
-  "homepage": "https://github.com/libp2p/js-libp2p-floodsub#readme",
+  "homepage": "https://github.com/metamask/js-libp2p-multicast-experiment#readme",
   "devDependencies": {
     "aegir": "^13.0.6",
     "benchmark": "^2.1.4",
@@ -71,5 +71,10 @@
     "Victor Bjelkholm <victorbjelkholm@gmail.com>",
     "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>",
     "wanderer <mjbecze@gmail.com>"
-  ]
+  ],
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "author": ""
 }
