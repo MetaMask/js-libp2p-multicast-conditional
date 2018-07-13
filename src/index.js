@@ -6,26 +6,22 @@ const assert = require('assert')
 const RpcBaseProtocol = require('./rpcBase')
 const utils = require('./utils')
 const pb = require('./message')
-const config = require('./config')
 const Buffer = require('safe-buffer').Buffer
 
-const multicodec = config.multicodec
 const ensureArray = utils.ensureArray
 const setImmediate = require('async/setImmediate')
 
 /**
- * FloodSub (aka dumbsub is an implementation of pubsub focused on
- * delivering an API for Publish/Subscribe, but with no CastTree Forming
- * (it just floods the network).
+ * Multicast is a p2p messaging experiment.
  */
-class FloodSub extends RpcBaseProtocol {
+class Multicast extends RpcBaseProtocol {
   /**
    * @param {Object} libp2p
-   * @returns {FloodSub}
+   * @returns {Multicast}
    */
   constructor (libp2p) {
     const protonCodec = pb.rpc.RPC
-    super('libp2p:floodsub', multicodec, protonCodec, libp2p)
+    super('libp2p:multicast', '/multicast/0.0.1', protonCodec, libp2p)
 
     /**
      * Time based cache for sequence numbers.
@@ -139,7 +135,7 @@ class FloodSub extends RpcBaseProtocol {
    *
    */
   publish (topics, messages) {
-    assert(this.started, 'FloodSub is not started')
+    assert(this.started, 'Multicast is not started')
 
     this.log('publish', topics, messages)
 
@@ -176,14 +172,14 @@ class FloodSub extends RpcBaseProtocol {
    * @returns {undefined}
    */
   subscribe (topics) {
-    assert(this.started, 'FloodSub is not started')
+    assert(this.started, 'Multicast is not started')
 
     topics = ensureArray(topics)
 
     topics.forEach((topic) => this.subscriptions.add(topic))
 
     this.peers.forEach((peer) => sendSubscriptionsOnceReady(peer))
-    // make sure that FloodSub is already mounted
+    // make sure that Multicast is already mounted
     function sendSubscriptionsOnceReady (peer) {
       if (peer && peer.isWritable) {
         return peer.sendSubscriptions(topics)
@@ -214,7 +210,7 @@ class FloodSub extends RpcBaseProtocol {
     topics.forEach((topic) => this.subscriptions.delete(topic))
 
     this.peers.forEach((peer) => checkIfReady(peer))
-    // make sure that FloodSub is already mounted
+    // make sure that Multicast is already mounted
     function checkIfReady (peer) {
       if (peer && peer.isWritable) {
         peer.sendUnsubscriptions(topics)
@@ -225,4 +221,4 @@ class FloodSub extends RpcBaseProtocol {
   }
 }
 
-module.exports = FloodSub
+module.exports = Multicast
