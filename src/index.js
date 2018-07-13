@@ -79,11 +79,18 @@ class Multicast extends RpcBaseProtocol {
 
       this.cache.put(seqno)
 
+      // decrement remaining hops
+      if (msg.hops !== undefined) {
+        msg.hops -= 1
+      }
+
       // 2. emit to self
       this._emitMessages(msg.topicIDs, [msg])
 
       // 3. propagate msg to others
-      this._forwardMessages(msg.topicIDs, [msg])
+      if (msg.hops === undefined || msg.hops > 0) {
+        this._forwardMessages(msg.topicIDs, [msg])
+      }
     })
   }
 
@@ -134,7 +141,7 @@ class Multicast extends RpcBaseProtocol {
    * @returns {undefined}
    *
    */
-  publish (topics, messages) {
+  publish (topics, messages, hops) {
     assert(this.started, 'Multicast is not started')
 
     this.log('publish', topics, messages)
@@ -151,6 +158,7 @@ class Multicast extends RpcBaseProtocol {
       return {
         from: from,
         data: msg,
+        hops: hops,
         seqno: new Buffer(seqno),
         topicIDs: topics
       }
