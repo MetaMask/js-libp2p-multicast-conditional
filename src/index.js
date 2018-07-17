@@ -79,18 +79,21 @@ class Multicast extends RpcBaseProtocol {
 
       this.cache.put(seqno)
 
-      // decrement remaining hops
-      if (msg.hops !== undefined) {
+      // 1. emit to self
+      this._emitMessages(msg.topicIDs, [msg])
+
+      // 2. don't propagate if we've reached 0
+      if (msg.hops === 0) {
+        return
+      }
+
+      // 3. decrement remaining hops
+      if (msg.hops && msg.hops > 0) {
         msg.hops -= 1
       }
 
-      // 2. emit to self
-      this._emitMessages(msg.topicIDs, [msg])
-
-      // 3. propagate msg to others
-      if (msg.hops === undefined || msg.hops > 0) {
-        this._forwardMessages(msg.topicIDs, [msg])
-      }
+      // 4. forward message
+      this._forwardMessages(msg.topicIDs, [msg])
     })
   }
 
