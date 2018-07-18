@@ -299,7 +299,7 @@ describe('multiple nodes (more than 2)', () => {
       })
     })
 
-    describe('propagation limitations', () => {
+    describe('limit propagation', () => {
       let a
       let b
       let c
