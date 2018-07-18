@@ -13,7 +13,7 @@ message RPC {
     optional bytes from = 1;
     optional bytes data = 2;
     optional bytes seqno = 3;
-    optional uint32 hops = 4;
+    optional int32 hops = 4 [default = -1];
     repeated string topicIDs = 5;
   }
 }`

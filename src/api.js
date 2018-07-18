@@ -5,7 +5,6 @@ const Multicast = require('./index')
 
 const NOT_STARTED_YET = 'The libp2p node is not started yet'
 
-
 module.exports = (node) => {
   const multicast = new Multicast(node)
 
