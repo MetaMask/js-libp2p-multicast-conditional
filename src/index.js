@@ -35,6 +35,38 @@ class Multicast extends RpcBaseProtocol {
      * @type {Set<string>}
      */
     this.subscriptions = new Set()
+
+    /**
+     * A map of validation functions to run before
+     * forwarding messages.
+     *
+     * The validators are ran per peer for each topic the
+     * peer is subscribed with, right before sending out
+     * the message. If any of the validators fail, the message
+     * is not forwarded to the peer.
+     *
+     * The validator function has the following signature:
+     *
+     * @example
+     * ```
+     * function (peer: PeerInfo, msg: Message): bool {
+     * }
+     * ```
+     *
+     * Returning a falsy value fails the validation.
+     *
+     * @type {Map<string, Set<function>>}
+     */
+    this._fwrdValidators = new Map()
+  }
+
+  addFrwdValidator (topic, func) {
+    if (!this._fwrdValidators.has(topic)) {
+      this._fwrdValidators.set(topic, new Set())
+    }
+
+    const validators = this._fwrdValidators.get(topic)
+    validators.add(func)
   }
 
   _onDial (peerInfo, conn, callback) {
@@ -84,6 +116,7 @@ class Multicast extends RpcBaseProtocol {
 
       // 2. don't propagate if we've reached 0
       if (msg.hops === 0) {
+        this.log('skipping forwarding message, hop count is 0')
         return
       }
 
@@ -115,7 +148,19 @@ class Multicast extends RpcBaseProtocol {
         return
       }
 
-      peer.sendMessages(utils.normalizeOutRpcMessages(messages))
+      let msgs = messages
+      for (let topic of peer.topics) {
+        if (this._fwrdValidators.has(topic)) {
+          const validators = Array.from(this._fwrdValidators.get(topic))
+          if (validators) {
+            msgs = msgs.filter((msg) => validators.every((validator) => {
+              return validator(peer, msg)
+            }))
+          }
+        }
+      }
+
+      peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
 
       this.log('publish msgs on topics', topics, peer.info.id.toB58String())
     })
