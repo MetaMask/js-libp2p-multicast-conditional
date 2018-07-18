@@ -186,6 +186,7 @@ class Multicast extends RpcBaseProtocol {
    *
    * @param {Array<string>|string} topics
    * @param {Array<any>|any} messages
+   * @param {number} hops
    * @returns {undefined}
    *
    */
