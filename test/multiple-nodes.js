@@ -405,19 +405,19 @@ describe('multiple nodes (more than 2)', () => {
 
         function noop () {}
         a.ps.on('Z', noop)
-        a.ps.addFrwdValidator('Z', fwrdValidator)
+        a.ps.addFrwdHook('Z', fwrdValidator)
 
         b.ps.on('Z', incMsg)
-        b.ps.addFrwdValidator('Z', fwrdValidator)
+        b.ps.addFrwdHook('Z', fwrdValidator)
 
         c.ps.on('Z', incMsg)
-        c.ps.addFrwdValidator('Z', fwrdValidator)
+        c.ps.addFrwdHook('Z', fwrdValidator)
 
         d.ps.on('Z', incMsg)
-        d.ps.addFrwdValidator('Z', fwrdValidator)
+        d.ps.addFrwdHook('Z', fwrdValidator)
 
         e.ps.on('Z', incMsg)
-        e.ps.addFrwdValidator('Z', fwrdValidator)
+        e.ps.addFrwdHook('Z', fwrdValidator)
 
         a.ps.publish('Z', Buffer.from('dont frwd message'))
         a.ps.publish('Z', Buffer.from('frwd message'))

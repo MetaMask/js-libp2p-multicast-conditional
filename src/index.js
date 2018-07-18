@@ -57,15 +57,15 @@ class Multicast extends RpcBaseProtocol {
      *
      * @type {Map<string, Set<function>>}
      */
-    this._fwrdValidators = new Map()
+    this._fwrdHooks = new Map()
   }
 
-  addFrwdValidator (topic, func) {
-    if (!this._fwrdValidators.has(topic)) {
-      this._fwrdValidators.set(topic, new Set())
+  addFrwdHook (topic, func) {
+    if (!this._fwrdHooks.has(topic)) {
+      this._fwrdHooks.set(topic, new Set())
     }
 
-    const validators = this._fwrdValidators.get(topic)
+    const validators = this._fwrdHooks.get(topic)
     validators.add(func)
   }
 
@@ -150,8 +150,8 @@ class Multicast extends RpcBaseProtocol {
 
       let msgs = messages
       for (let topic of peer.topics) {
-        if (this._fwrdValidators.has(topic)) {
-          const validators = Array.from(this._fwrdValidators.get(topic))
+        if (this._fwrdHooks.has(topic)) {
+          const validators = Array.from(this._fwrdHooks.get(topic))
           if (validators) {
             msgs = msgs.filter((msg) => validators.every((validator) => {
               return validator(peer, msg)
