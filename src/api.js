@@ -11,6 +11,14 @@ module.exports = (node) => {
   node._multicast = multicast
 
   return {
+    addFrwdHooks: (topic, hooks) => {
+      hooks.forEach((h) => multicast.addFrwdHook(topic, h))
+    },
+
+    removeFrwdHooks: (topic, hooks) => {
+      hooks.forEach((h) => multicast.removeFrwdHook(topic, h))
+    },
+
     subscribe: (topic, options, handler, callback) => {
       if (typeof options === 'function') {
         callback = handler
@@ -25,6 +33,11 @@ module.exports = (node) => {
       function subscribe (cb) {
         if (multicast.listenerCount(topic) === 0) {
           multicast.subscribe(topic)
+        }
+
+        options.frwdHooks = options.frwdHooks || []
+        if (options.frwdHooks.length) {
+          options.frwdHook.forEach((h) => multicast.addFrwdHook(topic, h))
         }
 
         multicast.on(topic, handler)
