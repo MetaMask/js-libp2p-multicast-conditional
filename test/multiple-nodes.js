@@ -367,7 +367,7 @@ describe('multiple nodes (more than 2)', () => {
         expectSet(e.ps.subscriptions, ['Z'])
       })
 
-      it('publishes from a with hop count', (done) => {
+      it('publishes from `a` with hop count', (done) => {
         let counter = 0
 
         a.ps.on('Z', incMsg)

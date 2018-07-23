@@ -60,13 +60,20 @@ class Multicast extends RpcBaseProtocol {
     this._fwrdHooks = new Map()
   }
 
-  addFrwdHook (topic, func) {
+  addFrwdHook (topic, hook) {
     if (!this._fwrdHooks.has(topic)) {
       this._fwrdHooks.set(topic, new Set())
     }
 
     const validators = this._fwrdHooks.get(topic)
-    validators.add(func)
+    validators.add(hook)
+  }
+
+  removeFrwdHook (topic, hook) {
+    if (this._fwrdHooks.has(topic)) {
+      const validators = this._fwrdHooks.get(topic)
+      validators.delete(hook)
+    }
   }
 
   _onDial (peerInfo, conn, callback) {
