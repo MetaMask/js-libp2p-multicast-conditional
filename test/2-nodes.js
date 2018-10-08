@@ -14,7 +14,6 @@ const utils = require('./utils')
 const first = utils.first
 const createNode = utils.createNode
 const expectSet = utils.expectSet
-const Buffer = require('safe-buffer').Buffer
 
 describe('basics between 2 nodes', () => {
   describe('fresh nodes', () => {
@@ -98,7 +97,7 @@ describe('basics between 2 nodes', () => {
 
       fsB.once('Z', shouldNotHappen)
 
-      fsA.publish('Z', new Buffer('hey'))
+      fsA.publish('Z', Buffer.from('hey'))
     })
 
     it('Publish to a topic:Z in nodeB', (done) => {
@@ -117,7 +116,7 @@ describe('basics between 2 nodes', () => {
 
       fsB.once('Z', shouldNotHappen)
 
-      fsB.publish('Z', new Buffer('banana'))
+      fsB.publish('Z', Buffer.from('banana'))
     })
 
     it('Publish 10 msg to a topic:Z in nodeB', (done) => {
@@ -139,7 +138,7 @@ describe('basics between 2 nodes', () => {
         }
       }
 
-      times(10, () => fsB.publish('Z', new Buffer('banana')))
+      times(10, () => fsB.publish('Z', Buffer.from('banana')))
     })
 
     it('Publish 10 msg to a topic:Z in nodeB as array', (done) => {
@@ -162,7 +161,7 @@ describe('basics between 2 nodes', () => {
       }
 
       let msgs = []
-      times(10, () => msgs.push(new Buffer('banana')))
+      times(10, () => msgs.push(Buffer.from('banana')))
       fsB.publish('Z', msgs)
     })
 
@@ -187,8 +186,8 @@ describe('basics between 2 nodes', () => {
         done()
       }, 100)
 
-      fsB.publish('Z', new Buffer('banana'))
-      fsA.publish('Z', new Buffer('banana'))
+      fsB.publish('Z', Buffer.from('banana'))
+      fsA.publish('Z', Buffer.from('banana'))
     })
 
     it('stop both FloodSubs', (done) => {
