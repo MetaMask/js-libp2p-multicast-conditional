@@ -215,7 +215,7 @@ class Multicast extends RpcBaseProtocol {
         from: from,
         data: msg,
         hops: hops,
-        seqno: new Buffer(seqno),
+        seqno: Buffer.from(seqno),
         topicIDs: topics
       }
     }
