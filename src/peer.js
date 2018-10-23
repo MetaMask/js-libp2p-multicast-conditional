@@ -4,6 +4,8 @@ const Pushable = require('pull-pushable')
 const setImmediate = require('async/setImmediate')
 const EventEmitter = require('events')
 
+const noop = () => {}
+
 /**
  * The known state of a connected peer.
  */
@@ -53,15 +55,18 @@ class Peer extends EventEmitter {
    * Throws if there is no `stream` to write to available.
    *
    * @param {Buffer} msg
-   * @returns {undefined}
+   * @param {Function} cb
+   * @returns {Function}
    */
-  write (msg) {
+  write (msg, cb) {
+    cb = cb || noop
     if (!this.isWritable) {
       const id = this.info.id.toB58String()
-      throw new Error('No writable connection to ' + id)
+      return cb(new Error('No writable connection to ' + id))
     }
 
     this.stream.push(msg)
+    cb()
   }
 
   /**

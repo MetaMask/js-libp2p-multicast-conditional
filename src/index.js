@@ -10,6 +10,8 @@ const Buffer = require('safe-buffer').Buffer
 
 const ensureArray = utils.ensureArray
 const setImmediate = require('async/setImmediate')
+const filter = require('async/filter')
+const every = require('async/every')
 
 /**
  * Multicast is a p2p messaging experiment.
@@ -49,11 +51,9 @@ class Multicast extends RpcBaseProtocol {
      *
      * @example
      * ```
-     * function (peer: PeerInfo, msg: Message): bool {
+     * function (peer: PeerInfo, msg: Message, callback) {
      * }
      * ```
-     *
-     * Returning a falsy value fails the validation.
      *
      * @type {Map<string, Set<function>>}
      */
@@ -155,21 +155,31 @@ class Multicast extends RpcBaseProtocol {
         return
       }
 
-      let msgs = messages
       for (let topic of peer.topics) {
         if (this._fwrdHooks.has(topic)) {
+          this.log('has hooks, only forward valid messages')
           const validators = Array.from(this._fwrdHooks.get(topic))
           if (validators) {
-            msgs = msgs.filter((msg) => validators.every((validator) => {
-              return validator(peer, msg)
-            }))
+            filter(messages, (msg, cb) => {
+              every(validators, (validator, cb) => {
+                validator(peer, msg, cb)
+              }, cb)
+            }, (err, msgs) => {
+              if (err) {
+                this.log(err)
+                return
+              }
+
+              peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
+              this.log('publish msgs on topics', topics, peer.info.id.toB58String())
+            })
           }
+        } else {
+          this.log('no hooks, forward all')
+          peer.sendMessages(utils.normalizeOutRpcMessages(messages))
+          this.log('publish msgs on topics', topics, peer.info.id.toB58String())
         }
       }
-
-      peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
-
-      this.log('publish msgs on topics', topics, peer.info.id.toB58String())
     })
   }
 
@@ -215,7 +225,7 @@ class Multicast extends RpcBaseProtocol {
         from: from,
         data: msg,
         hops: hops,
-        seqno: new Buffer(seqno),
+        seqno: Buffer.from(seqno),
         topicIDs: topics
       }
     }

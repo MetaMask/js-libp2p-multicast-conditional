@@ -399,8 +399,10 @@ describe('multiple nodes (more than 2)', () => {
       it('should not forward message', (done) => {
         let counter = 0
 
-        const fwrdValidator = (peer, msg) => {
+        const fwrdValidator = (peer, msg, cb) => {
           return msg.data.toString() === 'frwd message'
+            ? cb(null, msg.data.toString())
+            : cb(new Error(msg.data.toString()))
         }
 
         function noop () {}
