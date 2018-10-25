@@ -161,6 +161,10 @@ class Multicast extends RpcBaseProtocol {
           const validators = Array.from(this._fwrdHooks.get(topic))
           if (validators) {
             filter(messages, (msg, cb) => {
+              if (msg.topicIDs.indexOf(topic) < 0) {
+                return cb()
+              }
+
               every(validators, (validator, cb) => {
                 validator(peer, msg, cb)
               }, cb)
