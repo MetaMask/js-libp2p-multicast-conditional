@@ -1,5 +1,5 @@
 {
-  "name": "libp2p-multicast-experiment",
+  "name": "libp2p-multicast-conditional",
   "version": "0.15.0",
   "description": "Multicast is a p2p messaging experiment.",
   "main": "src/index.js",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/metamask/js-libp2p-multicast-experiment.git"
+    "url": "git+https://github.com/metamask/js-libp2p-multicast-conditional.git"
   },
   "keywords": [
     "IPFS",
