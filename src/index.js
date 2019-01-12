@@ -57,21 +57,21 @@ class Multicast extends RpcBaseProtocol {
      *
      * @type {Map<string, Set<function>>}
      */
-    this._fwrdHooks = new Map()
+    this.fwrdHooks = new Map()
   }
 
   addFrwdHook (topic, hook) {
-    if (!this._fwrdHooks.has(topic)) {
-      this._fwrdHooks.set(topic, new Set())
+    if (!this.fwrdHooks.has(topic)) {
+      this.fwrdHooks.set(topic, new Set())
     }
 
-    const validators = this._fwrdHooks.get(topic)
+    const validators = this.fwrdHooks.get(topic)
     validators.add(hook)
   }
 
   removeFrwdHook (topic, hook) {
-    if (this._fwrdHooks.has(topic)) {
-      const validators = this._fwrdHooks.get(topic)
+    if (this.fwrdHooks.has(topic)) {
+      const validators = this.fwrdHooks.get(topic)
       validators.delete(hook)
     }
   }
@@ -156,9 +156,9 @@ class Multicast extends RpcBaseProtocol {
       }
 
       for (let topic of peer.topics) {
-        if (this._fwrdHooks.has(topic)) {
+        if (this.fwrdHooks.has(topic)) {
           this.log('has hooks, only forward valid messages')
-          const validators = Array.from(this._fwrdHooks.get(topic))
+          const validators = Array.from(this.fwrdHooks.get(topic))
           if (validators) {
             filter(messages, (msg, cb) => {
               if (msg.topicIDs.indexOf(topic) < 0) {
@@ -174,8 +174,10 @@ class Multicast extends RpcBaseProtocol {
                 return
               }
 
-              peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
-              this.log('publish msgs on topics', topics, peer.info.id.toB58String())
+              if (msgs.length > 0) {
+                peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
+                this.log('publish msgs on topics', topics, peer.info.id.toB58String())
+              }
             })
           }
         } else {

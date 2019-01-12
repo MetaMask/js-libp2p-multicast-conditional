@@ -143,7 +143,7 @@ class BaseProtocol extends EventEmitter {
 
   /**
    * Mounts the floodsub protocol onto the libp2p node and sends our
-   * subscriptions to every peer conneceted
+   * subscriptions to every peer connected
    *
    * @param {Function} callback
    * @returns {undefined}
