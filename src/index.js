@@ -12,6 +12,7 @@ const ensureArray = utils.ensureArray
 const setImmediate = require('async/setImmediate')
 const filter = require('async/filter')
 const every = require('async/every')
+const concat = require('async/concat')
 
 /**
  * Multicast is a p2p messaging experiment.
@@ -155,37 +156,36 @@ class Multicast extends RpcBaseProtocol {
         return
       }
 
-      for (let topic of peer.topics) {
-        if (this.fwrdHooks.has(topic)) {
-          this.log('has hooks, only forward valid messages')
-          const validators = Array.from(this.fwrdHooks.get(topic))
-          if (validators) {
-            filter(messages, (msg, cb) => {
-              if (msg.topicIDs.indexOf(topic) < 0) {
-                return cb()
-              }
-
-              every(validators, (validator, cb) => {
-                validator(peer, msg, cb)
-              }, cb)
-            }, (err, msgs) => {
-              if (err) {
-                this.log(err)
-                return
-              }
-
-              if (msgs.length > 0) {
-                peer.sendMessages(utils.normalizeOutRpcMessages(msgs))
-                this.log('publish msgs on topics', topics, peer.info.id.toB58String())
-              }
-            })
-          }
-        } else {
-          this.log('no hooks, forward all')
-          peer.sendMessages(utils.normalizeOutRpcMessages(messages))
-          this.log('publish msgs on topics', topics, peer.info.id.toB58String())
+      concat(peer.topics, (topic, callback) => {
+        if (!this.fwrdHooks.has(topic)) {
+          return callback(null, messages)
         }
-      }
+
+        this.log('has hooks, only forward valid messages')
+        const validators = Array.from(this.fwrdHooks.get(topic))
+
+        if (!validators) {
+          return callback(null, messages)
+        }
+
+        filter(messages, (msg, cb) => {
+          if (msg.topicIDs.indexOf(topic) < 0) {
+            return cb()
+          }
+
+          every(validators, (validator, cb) => {
+            validator(peer, msg, cb)
+          }, cb)
+        }, callback)
+      }, (err, msgs) => {
+        if (err) {
+          this.log(err)
+          return
+        }
+
+        peer.sendMessages(utils.normalizeOutRpcMessages([...new Set(msgs)]))
+        this.log('publish msgs on topics', topics, peer.info.id.toB58String())
+      })
     })
   }
 
