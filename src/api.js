@@ -59,9 +59,14 @@ module.exports = (node) => {
       }
     },
 
-    publish: (topic, data, hops, callback) => {
+    publish: (topic, data, hops = -1, callback) => {
       if (!node.isStarted() && !multicast.started) {
         return setImmediate(() => callback(new Error(NOT_STARTED_YET)))
+      }
+
+      if (typeof hops === 'function') {
+        callback = hops
+        hops = -1
       }
 
       if (!Buffer.isBuffer(data)) {
